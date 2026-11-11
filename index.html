@@ -105,6 +105,7 @@
   });
   var $ = function (id) { return document.getElementById(id); };
   var name = (q.n || '').trim().slice(0, 60), tel = (q.p || '').replace(/[^\d+]/g, '').slice(0, 20);
+  if (tel[0] !== '+') tel = tel.length === 10 ? '+1' + tel : tel.length === 11 && tel[0] === '1' ? '+' + tel : tel; // Canada: +1
   var mail = /^[^\s@<>"]+@[^\s@<>"]+\.[a-z]{2,}$/i.test(q.e || '') ? q.e.slice(0, 80) : '';
   var col = C[q.c] || C.k, root = document.documentElement.style;
   root.setProperty('--key', col[0]); root.setProperty('--keyTx', col[1]);
