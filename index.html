@@ -151,6 +151,10 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   });
 })();
+// tapping another tag while this page is open only changes the part after # (no new page load): draw the new card
+window.addEventListener('hashchange', function () { location.reload(); });
+// coming back to a page the browser kept in memory: same, in case the link changed meanwhile
+window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
 </script>
 </body>
 </html>
