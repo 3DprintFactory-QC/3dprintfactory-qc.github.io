@@ -101,10 +101,26 @@
   $('call1').href = 'tel:' + p1; $('call1T').textContent = T.call + (a ? ' ' + a : ''); $('call1N').textContent = pretty(p1);
   if (p2) { $('call2').hidden = false; $('call2').href = 'tel:' + p2; $('call2T').textContent = T.call + (b ? ' ' + b : ''); $('call2N').textContent = pretty(p2); }
   if (note) { $('note').hidden = false; $('noteV').textContent = note; }
-  // the photo (optional): i = its name on the shop's Pi; d = the shop's preview only (the picture itself)
-  var PHOTOS = 'https://dietpi.tail9c6e17.ts.net/p/';
-  var src = /^[\w-]{12}$/.test(q.i || '') ? PHOTOS + q.i + '.jpg' : /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(q.d || '') ? q.d : '';
-  if (src) { var img = new Image(); img.alt = ''; img.onload = function () { var av = document.querySelector('.av'); av.innerHTML = ''; av.appendChild(img); }; img.src = src; }
+  // the photo (optional). i = the 12-byte secret (base64url, only in the tag): the file p/<name>.bin next to this page
+  // is the photo encrypted with AES-128-GCM; key = SHA-256(secret)[0..16], name = hex SHA-256("file" + secret)[0..20].
+  // It is opened here, in the phone. d = the shop's preview only (the picture itself).
+  function show(src) { var img = new Image(); img.alt = ''; img.onload = function () { var av = document.querySelector('.av'); av.innerHTML = ''; av.appendChild(img); }; img.src = src; }
+  if (/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(q.d || '')) show(q.d);
+  else if (/^[\w-]{16}$/.test(q.i || '') && window.crypto && crypto.subtle) (async function () {
+    try {
+      var b = atob(q.i.replace(/-/g, '+').replace(/_/g, '/')), sec = new Uint8Array(b.length);
+      for (var k = 0; k < b.length; k++) sec[k] = b.charCodeAt(k);
+      var pre = new Uint8Array(4 + sec.length); pre.set([102, 105, 108, 101]); pre.set(sec, 4); // "file" + secret
+      var nh = new Uint8Array(await crypto.subtle.digest('SHA-256', pre)), name = '';
+      for (k = 0; k < 10; k++) name += (nh[k] < 16 ? '0' : '') + nh[k].toString(16);
+      var kh = new Uint8Array(await crypto.subtle.digest('SHA-256', sec));
+      var key = await crypto.subtle.importKey('raw', kh.slice(0, 16), 'AES-GCM', false, ['decrypt']);
+      var r = await fetch('p/' + name + '.bin'); if (!r.ok) return;
+      var data = new Uint8Array(await r.arrayBuffer());
+      var jpg = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: data.slice(0, 12) }, key, data.slice(12));
+      show(URL.createObjectURL(new Blob([jpg], { type: 'image/jpeg' })));
+    } catch (e) {} // no photo: the grey person stays
+  })();
   // one vCard per contact, named "<contact> (<child>)"
   $('save').addEventListener('click', function () {
     var esc = function (s) { return s.replace(/([,;\\])/g, '\\$1'); }, v = '';
