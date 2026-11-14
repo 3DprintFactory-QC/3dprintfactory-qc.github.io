@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d0e10">
+<title>Emergency contact</title>
+<!-- Backpack NFC tag: emergency contact card. The tag holds a link like
+     https://<you>.github.io/sos/#n=Emma&a=Maman&p=14385551234&b=Papa&q=14385559876&m=Allergic+to+nuts&l=fr
+     n = child's name, a / p = contact 1 name / phone, b / q = contact 2 (optional), m = note (optional), l = fr or en (the tag's text).
+     A 10-digit or 1+10-digit phone gets +1. Everything after # stays in the phone (never sent to a server). -->
+<style>
+  :root { --bg: #0d0e10; --card: #17181c; --ink: #f4f4f5; --mut: #a1a1aa; --line: #34353b; --yel: #f5b82e; --yelTx: #1a1405; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { min-height: 100vh; min-height: 100dvh; background: var(--bg); color: var(--ink);
+    font: 16px/1.4 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; justify-content: center; align-items: center;
+    padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)); }
+  main { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .sos { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; background: rgba(239, 68, 68, .14);
+    color: #fca5a5; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .sos i { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 0 4px rgba(239, 68, 68, .25); }
+  .av { margin-top: 22px; width: 132px; height: 132px; border-radius: 50%; background: #e7e7ea; overflow: hidden;
+    box-shadow: 0 0 0 5px #26272c; display: flex; align-items: flex-end; justify-content: center; }
+  .av svg { width: 108px; height: 108px; }
+  h1 { margin: 22px 0 0; font-size: 34px; line-height: 1.1; font-weight: 800; letter-spacing: -.01em; word-break: break-word; }
+  .sub { margin-top: 8px; color: var(--mut); font-size: 17px; }
+  .sub b { display: block; color: var(--ink); font-weight: 600; font-size: 18px; }
+  .icons { margin-top: 22px; display: flex; gap: 16px; justify-content: center; }
+  .ic { width: 54px; height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; text-decoration: none;
+    -webkit-tap-highlight-color: transparent; transition: transform .08s; }
+  .ic:active, .b:active { transform: scale(.96); }
+  .ic svg { width: 28px; height: 28px; }
+  .ic.tel { background: #22c55e; } .ic.sms { background: #3b82f6; } .ic.wa { background: #25d366; }
+  .acts { width: 100%; margin-top: 26px; display: grid; gap: 12px; }
+  .b { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-height: 62px; padding: 10px 18px;
+    border-radius: 999px; font: inherit; font-size: 18px; font-weight: 700; line-height: 1.2; text-decoration: none; cursor: pointer;
+    -webkit-tap-highlight-color: transparent; transition: transform .08s; }
+  .b small { font-size: 14px; font-weight: 500; opacity: .75; font-variant-numeric: tabular-nums; }
+  .b.main { background: var(--yel); color: var(--yelTx); border: 0; }
+  .b.out { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .note { width: 100%; margin-top: 18px; padding: 14px 16px; border-radius: 16px; background: var(--card); border: 1px solid var(--line);
+    text-align: left; font-size: 16px; }
+  .note b { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #fca5a5; margin-bottom: 4px; }
+  .save { margin-top: 18px; background: none; border: 0; color: var(--mut); font: inherit; font-size: 15px; text-decoration: underline;
+    text-underline-offset: 3px; cursor: pointer; padding: 8px; }
+  .ft { margin-top: 22px; font-size: 12px; color: #6b6b73; letter-spacing: .04em; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <div class="sos"><i></i><span id="sosT"></span></div>
+  <div class="av" aria-hidden="true">
+    <svg viewBox="0 0 100 100"><circle cx="50" cy="38" r="20" fill="#a9a9b0"/><path d="M12 100c2-24 18-36 38-36s36 12 38 36z" fill="#a9a9b0"/></svg>
+  </div>
+  <h1 id="name"></h1>
+  <div class="sub" id="sub"></div>
+  <div class="icons" id="icons">
+    <a class="ic tel" id="icTel" aria-label="Call"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a>
+    <a class="ic sms" id="icSms" aria-label="Text"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>
+    <a class="ic wa" id="icWa" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg></a>
+  </div>
+  <div class="acts">
+    <a class="b main" id="call1"><span id="call1T"></span><small id="call1N"></small></a>
+    <a class="b out" id="call2" hidden><span id="call2T"></span><small id="call2N"></small></a>
+  </div>
+  <div class="note" id="note" hidden><b id="noteT"></b><span id="noteV"></span></div>
+  <button class="save" id="save" type="button"></button>
+  <div class="ft" id="ft"></div>
+</main>
+<script>
+(function () {
+  var q = {};
+  (location.hash || '').replace(/^#/, '').split('&').forEach(function (kv) {
+    var i = kv.indexOf('=');
+    if (i > 0) try { q[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' ')); } catch (e) {}
+  });
+  var fr = q.l ? q.l === 'fr' : /^fr/i.test(navigator.language || '');
+  document.documentElement.lang = fr ? 'fr' : 'en';
+  var T = fr ? { sos: 'Contact d’urgence', sub: 'Si vous avez trouvé ce sac ou cet enfant,', sub2: 'appelez :', call: 'Appeler', note: 'Important',
+                 save: 'Ajouter aux contacts', ft: 'Étiquette NFC imprimée en 3D', empty: 'Cette puce est vide', title: 'Contact d’urgence' }
+             : { sos: 'Emergency contact', sub: 'If you found this bag or this child,', sub2: 'please call:', call: 'Call', note: 'Important',
+                 save: 'Add to contacts', ft: '3D-printed NFC tag', empty: 'This tag is empty', title: 'Emergency contact' };
+  var $ = function (id) { return document.getElementById(id); };
+  var tel = function (p) { p = (p || '').replace(/[^\d+]/g, '').slice(0, 20); if (p[0] === '+') return p;
+    return p.length === 10 ? '+1' + p : p.length === 11 && p[0] === '1' ? '+' + p : p; };
+  var pretty = function (t) { var d = t.replace(/\D/g, '');
+    return d.length === 11 && d[0] === '1' ? '+1 ' + d.slice(1, 4) + ' ' + d.slice(4, 7) + '-' + d.slice(7) : t; };
+  var name = (q.n || '').trim().slice(0, 40), a = (q.a || '').trim().slice(0, 30), b = (q.b || '').trim().slice(0, 30);
+  var p1 = tel(q.p), p2 = tel(q.q), note = (q.m || '').trim().slice(0, 120);
+  $('sosT').textContent = T.sos; $('ft').textContent = T.ft; $('save').textContent = T.save; $('noteT').textContent = T.note;
+  if (!p1) { $('name').textContent = T.empty; ['icons', 'call1', 'save'].forEach(function (id) { $(id).hidden = true; }); return; }
+  document.title = (name ? name + ' · ' : '') + T.title;
+  $('name').textContent = name || T.title;
+  $('sub').innerHTML = ''; $('sub').append(T.sub); var s2 = document.createElement('b'); s2.textContent = T.sub2; $('sub').append(s2);
+  $('icTel').href = 'tel:' + p1; $('icSms').href = 'sms:' + p1; $('icWa').href = 'https://wa.me/' + p1.replace(/\D/g, '');
+  $('call1').href = 'tel:' + p1; $('call1T').textContent = T.call + (a ? ' ' + a : ''); $('call1N').textContent = pretty(p1);
+  if (p2) { $('call2').hidden = false; $('call2').href = 'tel:' + p2; $('call2T').textContent = T.call + (b ? ' ' + b : ''); $('call2N').textContent = pretty(p2); }
+  if (note) { $('note').hidden = false; $('noteV').textContent = note; }
+  // one vCard per contact, named "<contact> (<child>)"
+  $('save').addEventListener('click', function () {
+    var esc = function (s) { return s.replace(/([,;\\])/g, '\\$1'); }, v = '';
+    [[a, p1], [b, p2]].forEach(function (c) { if (!c[1]) return;
+      var fn = (c[0] || T.sos) + (name ? ' (' + name + ')' : '');
+      v += 'BEGIN:VCARD\r\nVERSION:3.0\r\nFN:' + esc(fn) + '\r\nN:;' + esc(fn) + ';;;\r\nTEL;TYPE=CELL:' + c[1] + '\r\n' + (note ? 'NOTE:' + esc(note) + '\r\n' : '') + 'END:VCARD\r\n'; });
+    var url = URL.createObjectURL(new Blob([v], { type: 'text/vcard;charset=utf-8' })), el = document.createElement('a');
+    el.href = url; el.download = (name || 'contact').replace(/[^\w\- ]+/g, '') + '.vcf';
+    document.body.appendChild(el); el.click(); el.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  });
+})();
+// another tag tapped while this page is open only changes the part after #: draw the new card
+window.addEventListener('hashchange', function () { location.reload(); });
+window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
+</script>
+</body>
+</html>
