@@ -25,6 +25,7 @@
   .av { margin-top: 22px; width: 132px; height: 132px; border-radius: 50%; background: #e7e7ea; overflow: hidden;
     box-shadow: 0 0 0 5px #26272c; display: flex; align-items: flex-end; justify-content: center; }
   .av svg { width: 108px; height: 108px; }
+  .av svg[viewBox="0 0 100 100"]:only-child { width: 100%; height: 100%; }
   .av img { width: 100%; height: 100%; object-fit: cover; display: block; }
   h1 { margin: 22px 0 0; font-size: 34px; line-height: 1.1; font-weight: 800; letter-spacing: -.01em; word-break: break-word; }
   .sub { margin-top: 8px; color: var(--mut); font-size: 17px; }
@@ -101,6 +102,9 @@
   $('call1').href = 'tel:' + p1; $('call1T').textContent = T.call + (a ? ' ' + a : ''); $('call1N').textContent = pretty(p1);
   if (p2) { $('call2').hidden = false; $('call2').href = 'tel:' + p2; $('call2T').textContent = T.call + (b ? ' ' + b : ''); $('call2N').textContent = pretty(p2); }
   if (note) { $('note').hidden = false; $('noteV').textContent = note; }
+  // c = the tag's colour: a drawn girl (p, pink tag) or boy (b, blue tag) in the circle; none = the grey person
+  var AV = { p: '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#fde2ec"/><circle cx="22" cy="54" r="11" fill="#5b3a29"/><circle cx="78" cy="54" r="11" fill="#5b3a29"/><path d="M16 100c2-20 16-30 34-30s32 10 34 30z" fill="#ec8fb4"/><rect x="44" y="60" width="12" height="11" fill="#f2c4a2"/><circle cx="50" cy="43" r="23" fill="#5b3a29"/><circle cx="50" cy="46" r="19" fill="#f9d7bd"/><path d="M31 42c2-14 12-21 19-21s17 7 19 21c-8-6-14-9-19-9s-12 3-19 9z" fill="#5b3a29"/><circle cx="43" cy="47" r="2.4" fill="#2b2b2b"/><circle cx="57" cy="47" r="2.4" fill="#2b2b2b"/><circle cx="38" cy="53" r="3.2" fill="#f4a3b8"/><circle cx="62" cy="53" r="3.2" fill="#f4a3b8"/><path d="M44 55q6 5 12 0" stroke="#c0392b" stroke-width="2.2" fill="none" stroke-linecap="round"/><g fill="#e2557f"><path d="M66 22l10-6v12z"/><path d="M66 22l-10-6v12z"/><circle cx="66" cy="22" r="3.2"/></g></svg>', b: '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#dbe4ff"/><path d="M16 100c2-20 16-30 34-30s32 10 34 30z" fill="#2430b8"/><rect x="44" y="60" width="12" height="11" fill="#f2c4a2"/><circle cx="31" cy="48" r="4" fill="#f2c4a2"/><circle cx="69" cy="48" r="4" fill="#f2c4a2"/><circle cx="50" cy="46" r="19" fill="#f9d7bd"/><path d="M30 44c-2-16 9-25 20-25s23 7 20 25c-4-8-11-12-20-12s-16 4-20 12z" fill="#6b3e1e"/><path d="M46 20q6-7 12-2q-5 0-7 4z" fill="#6b3e1e"/><circle cx="43" cy="47" r="2.4" fill="#2b2b2b"/><circle cx="57" cy="47" r="2.4" fill="#2b2b2b"/><circle cx="38" cy="53" r="3" fill="#f0b9a0"/><circle cx="62" cy="53" r="3" fill="#f0b9a0"/><path d="M44 55q6 5 12 0" stroke="#c0392b" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>' };
+  if (AV[q.c]) { document.querySelector('.av').innerHTML = AV[q.c]; document.querySelector('.av').style.boxShadow = '0 0 0 5px ' + (q.c === 'p' ? '#ec8fb4' : '#3b4fd8'); }
   // the photo (optional). i = the 12-byte secret (base64url, only in the tag): the file p/<name>.bin next to this page
   // is the photo encrypted with AES-128-GCM; key = SHA-256(secret)[0..16], name = hex SHA-256("file" + secret)[0..20].
   // It is opened here, in the phone. d = the shop's preview only (the picture itself).
