@@ -25,6 +25,7 @@
   .av { margin-top: 22px; width: 132px; height: 132px; border-radius: 50%; background: #e7e7ea; overflow: hidden;
     box-shadow: 0 0 0 5px #26272c; display: flex; align-items: flex-end; justify-content: center; }
   .av svg { width: 108px; height: 108px; }
+  .av img { width: 100%; height: 100%; object-fit: cover; display: block; }
   h1 { margin: 22px 0 0; font-size: 34px; line-height: 1.1; font-weight: 800; letter-spacing: -.01em; word-break: break-word; }
   .sub { margin-top: 8px; color: var(--mut); font-size: 17px; }
   .sub b { display: block; color: var(--ink); font-weight: 600; font-size: 18px; }
@@ -100,6 +101,10 @@
   $('call1').href = 'tel:' + p1; $('call1T').textContent = T.call + (a ? ' ' + a : ''); $('call1N').textContent = pretty(p1);
   if (p2) { $('call2').hidden = false; $('call2').href = 'tel:' + p2; $('call2T').textContent = T.call + (b ? ' ' + b : ''); $('call2N').textContent = pretty(p2); }
   if (note) { $('note').hidden = false; $('noteV').textContent = note; }
+  // the photo (optional): i = its name on the shop's Pi; d = the shop's preview only (the picture itself)
+  var PHOTOS = 'https://dietpi.tail9c6e17.ts.net/p/';
+  var src = /^[\w-]{12}$/.test(q.i || '') ? PHOTOS + q.i + '.jpg' : /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(q.d || '') ? q.d : '';
+  if (src) { var img = new Image(); img.alt = ''; img.onload = function () { var av = document.querySelector('.av'); av.innerHTML = ''; av.appendChild(img); }; img.src = src; }
   // one vCard per contact, named "<contact> (<child>)"
   $('save').addEventListener('click', function () {
     var esc = function (s) { return s.replace(/([,;\\])/g, '\\$1'); }, v = '';
